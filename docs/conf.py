@@ -240,4 +240,10 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+intersphinx_mapping = {
+    'py': ('http://docs.python.org/', None),
+    'django': (
+        'http://docs.djangoproject.com/en/1.3',
+        'http://docs.djangoproject.com/en/1.3/_objects/'
+    )
+}
