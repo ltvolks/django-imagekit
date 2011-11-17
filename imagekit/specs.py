@@ -11,6 +11,10 @@ from imagekit import processors
 from imagekit.lib import *
 from imagekit.utils import img_to_fobj
 from django.core.files.base import ContentFile
+from django.conf import settings
+
+
+IMAGEKIT_MISSING_IMAGE = getattr(settings, 'IMAGEKIT_MISSING_IMAGE', None)
 
 
 class ImageSpec(object):
@@ -58,7 +62,10 @@ class Accessor(object):
             try:
                 fp = self._obj._imgfield.storage.open(self._obj._imgfield.name)
             except IOError:
-                return
+                if IMAGEKIT_MISSING_IMAGE:
+                    fp = file(IMAGEKIT_MISSING_IMAGE, 'rb')
+                else:
+                    return
             fp.seek(0)
             fp = StringIO(fp.read())
             self._img, self._fmt = self.spec.process(Image.open(fp), self._obj)
@@ -125,7 +132,10 @@ class Accessor(object):
         if not self._img:
             self._create()
             if not self._img:
-                self._img = Image.open(self.file)
+                try:
+                    self._img = Image.open(self.file)
+                except IOError:   # prevent TemplateSyntaxError
+                    raise AttributeError
         return self._img
 
     @property
