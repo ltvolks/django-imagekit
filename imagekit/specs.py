@@ -5,6 +5,7 @@ inheriting from ImageModel will be modified with a descriptor/accessor for each
 spec found.
 
 """
+import logging
 import os
 from StringIO import StringIO
 from imagekit import processors
@@ -15,6 +16,8 @@ from django.conf import settings
 
 
 IMAGEKIT_MISSING_IMAGE = getattr(settings, 'IMAGEKIT_MISSING_IMAGE', None)
+
+log = logging.getLogger(__name__)
 
 
 class ImageSpec(object):
@@ -62,6 +65,7 @@ class Accessor(object):
             try:
                 fp = self._obj._imgfield.storage.open(self._obj._imgfield.name)
             except IOError:
+                log.exception("missing image: %s" % self._obj._imgfield.name)
                 if IMAGEKIT_MISSING_IMAGE:
                     fp = file(IMAGEKIT_MISSING_IMAGE, 'rb')
                 else:
