@@ -18,13 +18,15 @@ def flush_cache(apps, options):
     """ Clears the image cache
 
     """
+    verbosity = int(options.get('verbosity', 1))
     apps = [a.strip(',') for a in apps]
     if apps:
         for app_label in apps:
             app = cache.get_app(app_label)
             models = [m for m in cache.get_models(app) if issubclass(m, ImageModel)]
             for model in models:
-                print 'Flushing cache for "%s.%s"' % (app_label, model.__name__)
+                if verbosity > 0:
+                    print 'Flushing cache for "%s.%s"' % (app_label, model.__name__)
                 for obj in model.objects.order_by('-id'):
                     for spec in model._ik.specs:
                         prop = getattr(obj, spec.name(), None)
